@@ -166,7 +166,9 @@
         resource_type: 'auto'
       }, (error, result) => {
         if (!error && result && result.event === "success") {
-          uploadedFileUrl = result.info.secure_url;
+          // FIX HERE: Inject /fl_attachment/ right after /upload/ to bypass 401 restrictions
+          let rawUrl = result.info.secure_url;
+          uploadedFileUrl = rawUrl.replace('/upload/', '/upload/fl_attachment/');
           
           document.getElementById('upload_btn_text').innerHTML = `<i class="bi bi-check-circle-fill text-success me-2"></i> Ready: ${result.info.original_filename}`;
           document.getElementById('upload_status').className = "form-text text-success mt-2 small";
