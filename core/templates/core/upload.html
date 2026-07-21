@@ -116,7 +116,8 @@
                 <p class="text-muted small m-0">Publish a new build package to your store</p>
             </div>
 
-            <div id="appUploadForm">
+            <!-- Notice: NO <form> tag wrapping fields to completely prevent native form submission payloads -->
+            <div id="appUploadContainer">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label>Application Name</label>
