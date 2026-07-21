@@ -41,7 +41,6 @@ def upload_app(val_request):
 
 def delete_app(val_request, pk):
     app = get_object_or_404(Application, pk=pk)
-    if app.file:
-        app.file.delete(save=False)
+    # Safely delete the database record without throwing storage file errors on Cloudinary string URLs
     app.delete()
     return redirect('app_list')
