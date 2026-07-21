@@ -2,9 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "appstore/wsgi.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb" }
+      "src": "appstore_project/wsgi.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -14,7 +13,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "appstore/wsgi.py"
+      "dest": "appstore_project/wsgi.py"
     }
   ]
 }
