@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-h6#h_2c)3h5twyls8l$6e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['jarodjay-appstore.onrender.com', '.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
