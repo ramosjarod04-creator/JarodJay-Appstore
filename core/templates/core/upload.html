@@ -135,7 +135,6 @@
 
                 <div class="mb-3">
                     <label class="form-label">Application Package File</label>
-                    <!-- Triggers Cloudinary's isolated external overlay modal window -->
                     <button type="button" id="upload_widget_open" class="btn btn-outline-light w-100 py-2 text-start d-flex align-items-center justify-content-between">
                         <span id="upload_btn_text"><i class="bi bi-folder2-open me-2"></i>Choose file via Cloudinary...</span>
                         <span class="badge bg-secondary">Cloud Uploader</span>
@@ -159,7 +158,6 @@
     <script>
       let uploadedFileUrl = "";
 
-      // Initialize Cloudinary Widget configuration with a 20GB limit configuration
       const myWidget = cloudinary.createUploadWidget({
         cloudName: 'daubtyuya',
         uploadPreset: 'appstore_unsigned',
@@ -200,7 +198,6 @@
           this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
 
           try {
-              // Sends a tiny text-only JSON request (< 1 KB) containing just the file's remote URL
               const response = await fetch("{% url 'upload_app' %}", {
                   method: "POST",
                   headers: {

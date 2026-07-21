@@ -207,8 +207,8 @@
                         <p class="card-text flex-grow-1" style="font-size: 0.95rem; line-height: 1.6;">{{ app.description }}</p>
                         
                         <div class="mt-4 pt-3 border-top border-light border-opacity-10 d-grid gap-2">
-                            <!-- Handles both standard file fields and cloud-stored string URLs safely -->
-                            <a href="{% if app.file.url %}{{ app.file.url }}{% else %}{{ app.file }}{% endif %}" class="btn btn-download py-2 d-flex align-items-center justify-content-center gap-2" download target="_blank">
+                            <!-- Direct Cloudinary URL reference preventing local media 404 routing loop -->
+                            <a href="{{ app.file }}" class="btn btn-download py-2 d-flex align-items-center justify-content-center gap-2" download target="_blank">
                                 <i class="bi bi-download"></i> Download
                             </a>
                             <a href="{% url 'delete_app' app.id %}" class="btn btn-delete py-1 btn-sm d-flex align-items-center justify-content-center gap-1" onclick="return confirm('Are you sure you want to delete this app?');">
