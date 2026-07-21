@@ -184,7 +184,7 @@
       document.getElementById("submitBtn").addEventListener("click", async function(e) {
           e.preventDefault();
 
-          const name = document.getElementById('appName',).value;
+          const name = document.getElementById('appName').value;
           const version = document.getElementById('appVersion').value;
           const description = document.getElementById('appDescription').value;
           const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
@@ -199,7 +199,7 @@
           this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
 
           try {
-              // Sends a tiny JSON payload consisting of text characters only (< 1 KB)
+              // Sends a tiny text-only JSON request (< 1 KB) containing just the file's remote URL
               const response = await fetch("{% url 'upload_app' %}", {
                   method: "POST",
                   headers: {
