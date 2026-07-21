@@ -9,5 +9,6 @@ class ApplicationForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'version': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            # Hidden input ensures Django renders it invisibly so our Cloudinary JavaScript widget can target the field id
+            'file': forms.HiddenInput(),
         }

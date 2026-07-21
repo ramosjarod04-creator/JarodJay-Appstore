@@ -8,7 +8,8 @@ def app_list(val_request):
 
 def upload_app(val_request):
     if val_request.method == 'POST':
-        form = ApplicationForm(val_request.POST, val_request.FILES)
+        # Remove val_request.FILES since files now upload directly client-side to Cloudinary via widget
+        form = ApplicationForm(val_request.POST)
         if form.is_valid():
             app = form.save(commit=False)
             
