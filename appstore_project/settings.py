@@ -80,6 +80,16 @@ WSGI_APPLICATION = 'appstore_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+#
+# IMPORTANT: On Render, set the DATABASE_URL environment variable to your
+# Neon Postgres connection string (Render dashboard -> your web service ->
+# Environment -> Add Environment Variable -> Key: DATABASE_URL).
+#
+# If DATABASE_URL is not set, this falls back to a local SQLite file, which
+# works fine for local development but gets wiped on every Render redeploy
+# (ephemeral disk) — that fallback is what was causing your data to
+# disappear on refresh/redeploy. Once DATABASE_URL points to Neon, this
+# uses Postgres instead and your data will persist.
 
 DATABASES = {
     'default': dj_database_url.parse(
