@@ -7,6 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
+    <!-- Cloudinary Global Upload Widget -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -131,13 +134,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Select Package File</label>
-                    <!-- Standard browser file picker mapped directly to Cloudinary fetch upload -->
-                    <input type="file" id="appFileField" class="form-control" required>
-                    <div id="upload_status" class="form-text text-muted mt-2 small">Select your application file. It will upload directly to Cloudinary.</div>
+                    <label class="form-label">Application Package File</label>
+                    <!-- Triggers Cloudinary's isolated external overlay modal window -->
+                    <button type="button" id="upload_widget_open" class="btn btn-outline-light w-100 py-2 text-start d-flex align-items-center justify-content-between">
+                        <span id="upload_btn_text"><i class="bi bi-folder2-open me-2"></i>Choose file via Cloudinary...</span>
+                        <span class="badge bg-secondary">Cloud Uploader</span>
+                    </button>
+                    <div id="upload_status" class="form-text text-warning mt-2 small">⚠️ Please upload your package file via the cloud uploader first.</div>
                 </div>
 
-                <button type="button" id="submitBtn" class="btn btn-custom-primary w-100 mt-2">
+                <button type="button" id="submitBtn" class="btn btn-custom-primary w-100 mt-2" disabled>
                     <i class="bi bi-cloud-arrow-up me-2"></i>Publish Application
                 </button>
             </div>
@@ -151,49 +157,49 @@
     </div>
 
     <script>
+      let uploadedFileUrl = "";
+
+      // Initialize Cloudinary Widget configuration
+      const myWidget = cloudinary.createUploadWidget({
+        cloudName: 'daubtyuya',
+        uploadPreset: 'appstore_unsigned',
+        maxFileSize: 500000000, 
+        resource_type: 'auto'
+      }, (error, result) => {
+        if (!error && result && result.event === "success") {
+          uploadedFileUrl = result.info.secure_url;
+          
+          document.getElementById('upload_btn_text').innerHTML = `<i class="bi bi-check-circle-fill text-success me-2"></i> Ready: ${result.info.original_filename}`;
+          document.getElementById('upload_status').className = "form-text text-success mt-2 small";
+          document.getElementById('upload_status').innerText = "✓ File uploaded successfully to Cloudinary!";
+          document.getElementById('submitBtn').removeAttribute('disabled');
+        }
+      });
+
+      document.getElementById("upload_widget_open").addEventListener("click", function(e) {
+          e.preventDefault();
+          myWidget.open();
+      }, false);
+
       document.getElementById("submitBtn").addEventListener("click", async function(e) {
           e.preventDefault();
 
-          const name = document.getElementById('appName').value;
+          const name = document.getElementById('appName',).value;
           const version = document.getElementById('appVersion').value;
           const description = document.getElementById('appDescription').value;
-          const fileInput = document.getElementById('appFileField');
           const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
           const csrfToken = csrfInput ? csrfInput.value : '';
 
-          if (!name || !version || fileInput.files.length === 0) {
-              alert("Please fill out all fields and select a file.");
+          if (!name || !version || !uploadedFileUrl) {
+              alert("Please fill out all fields and ensure the file is uploaded.");
               return;
           }
 
-          const file = fileInput.files[0];
-          const submitBtn = this;
-
-          submitBtn.setAttribute('disabled', 'true');
-          submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading file to cloud...';
+          this.setAttribute('disabled', 'true');
+          this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
 
           try {
-              // 1. Upload file directly from browser to Cloudinary via signed/unsigned endpoint (bypassing Vercel completely)
-              const formData = new FormData();
-              formData.append("file", file);
-              formData.append("upload_preset", "appstore_unsigned"); // Your Cloudinary unsigned preset
-
-              const cloudName = "daubtyuya"; 
-              const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-                  method: "POST",
-                  body: formData // Sent directly to Cloudinary servers, never to Vercel backend
-              });
-
-              if (!cloudinaryRes.ok) {
-                  throw new Error("Cloudinary upload failed.");
-              }
-
-              const cloudData = await cloudinaryRes.json();
-              const uploadedFileUrl = cloudData.secure_url;
-
-              submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving record...';
-
-              // 2. Send only lightweight text data (JSON) to your Django backend on Vercel
+              // Sends a tiny JSON payload consisting of text characters only (< 1 KB)
               const response = await fetch("{% url 'upload_app' %}", {
                   method: "POST",
                   headers: {
@@ -211,15 +217,15 @@
               if (response.ok) {
                   window.location.href = "{% url 'app_list' %}";
               } else {
-                  alert("Failed to save application record in database.");
-                  submitBtn.removeAttribute('disabled');
-                  submitBtn.innerHTML = '<i class="bi bi-cloud-arrow-up me-2"></i>Publish Application';
+                  alert("Failed to save application record.");
+                  this.removeAttribute('disabled');
+                  this.innerHTML = '<i class="bi bi-cloud-arrow-up me-2"></i>Publish Application';
               }
           } catch (err) {
               console.error(err);
-              alert("An error occurred during upload: " + err.message);
-              submitBtn.removeAttribute('disabled');
-              submitBtn.innerHTML = '<i class="bi bi-cloud-arrow-up me-2"></i>Publish Application';
+              alert("An error occurred during submission.");
+              this.removeAttribute('disabled');
+              this.innerHTML = '<i class="bi bi-cloud-arrow-up me-2"></i>Publish Application';
           }
       });
     </script>
