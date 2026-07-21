@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JarodJay Appstore</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #cbd5e1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.2) 0%, transparent 40%);
+        }
+
+        .glass-header {
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .hero-title {
+            font-weight: 700;
+            background: linear-gradient(135deg, #a5b4fc 0%, #e879f9 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box::placeholder {
+            color: #cbd5e1;
+            opacity: 0.8;
+        }
+
+        .search-box:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #818cf8;
+            box-shadow: 0 0 15px var(--accent-glow);
+            color: #fff;
+        }
+
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(129, 140, 248, 0.6);
+            box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.4);
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Fixed text color for card descriptions to ensure full visibility */
+        .app-card .card-text {
+            color: #f1f5f9 !important;
+        }
+
+        .version-badge {
+            background: rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .btn-custom-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-custom-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .btn-download {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download:hover {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-delete {
+            background: rgba(248, 113, 113, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background: rgba(248, 113, 113, 0.25);
+            color: #ffffff;
+            border-color: rgba(248, 113, 113, 0.6);
+        }
+
+        .empty-state {
+            padding: 80px 20px;
+            text-align: center;
+            background: var(--card-bg);
+            border: 1px dashed var(--card-border);
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Glassmorphism Navbar -->
+    <header class="glass-header py-3 mb-5">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #6366f1, #a855f7); width: 40px; height: 40px;">
+                    <i class="bi bi-grid-fill text-white fs-5"></i>
+                </div>
+                <h4 class="m-0 hero-title">JARODJAY APPSTORE</h4>
+            </div>
+            <a href="{% url 'upload_app' %}" class="btn btn-custom-primary">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i>Upload App
+            </a>
+        </div>
+    </header>
+
+    <div class="container pb-5">
+        
+        <!-- Search and Header Section -->
+        <div class="row align-items-center mb-5">
+            <div class="col-md-7">
+                <h1 class="hero-title display-5 fw-bold mb-2">APPSTORE KO TO</h1>
+                <p class="text-white-50 m-0">Jarod Jay Ramos</p>
+            </div>
+            <div class="col-md-5 mt-4 mt-md-0">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" id="appSearch" class="form-control search-box ps-5" placeholder="Search applications...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Cards Grid -->
+        <div class="row g-4" id="appGrid">
+            {% for app in apps %}
+                <div class="col-md-4 app-item" data-name="{{ app.name|lower }}" data-desc="{{ app.description|lower }}">
+                    <div class="app-card h-100 p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title fw-bold text-white m-0 text-truncate" style="max-width: 70%;">{{ app.name }}</h5>
+                            <span class="badge version-badge">v{{ app.version }}</span>
+                        </div>
+                        <p class="card-text flex-grow-1" style="font-size: 0.95rem; line-height: 1.6;">{{ app.description }}</p>
+                        
+                        <div class="mt-4 pt-3 border-top border-light border-opacity-10 d-grid gap-2">
+                            <a href="{{ app.file.url }}" class="btn btn-download py-2 d-flex align-items-center justify-content-center gap-2" download>
+                                <i class="bi bi-download"></i> Download
+                            </a>
+                            <a href="{% url 'delete_app' app.id %}" class="btn btn-delete py-1 btn-sm d-flex align-items-center justify-content-center gap-1" onclick="return confirm('Are you sure you want to delete this app?');">
+                                <i class="bi bi-trash3"></i> Remove
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="bi bi-box-seam display-3 text-muted mb-3 d-block"></i>
+                        <h4 class="text-white fw-semibold">No applications found</h4>
+                        <p class="text-muted mb-4">Your store doesn't have any apps uploaded yet.</p>
+                        <a href="{% url 'upload_app' %}" class="btn btn-custom-primary">Upload Your First App</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- JavaScript for Live Instant Search Filtering -->
+    <script>
+        const searchInput = document.getElementById('appSearch');
+        const appItems = document.querySelectorAll('.app-item');
+
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+
+            appItems.forEach(item => {
+                const name = item.getAttribute('data-name');
+                const desc = item.getAttribute('data-desc');
+
+                if (name.includes(query) || desc.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
