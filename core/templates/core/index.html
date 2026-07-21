@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>JarodJay Appstore</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts: Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
@@ -99,7 +96,6 @@
             opacity: 1;
         }
 
-        /* Fixed text color for card descriptions to ensure full visibility */
         .app-card .card-text {
             color: #f1f5f9 !important;
         }
@@ -172,7 +168,6 @@
 </head>
 <body>
 
-    <!-- Glassmorphism Navbar -->
     <header class="glass-header py-3 mb-5">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
@@ -188,8 +183,6 @@
     </header>
 
     <div class="container pb-5">
-        
-        <!-- Search and Header Section -->
         <div class="row align-items-center mb-5">
             <div class="col-md-7">
                 <h1 class="hero-title display-5 fw-bold mb-2">APPSTORE KO TO</h1>
@@ -203,7 +196,6 @@
             </div>
         </div>
 
-        <!-- Application Cards Grid -->
         <div class="row g-4" id="appGrid">
             {% for app in apps %}
                 <div class="col-md-4 app-item" data-name="{{ app.name|lower }}" data-desc="{{ app.description|lower }}">
@@ -215,7 +207,8 @@
                         <p class="card-text flex-grow-1" style="font-size: 0.95rem; line-height: 1.6;">{{ app.description }}</p>
                         
                         <div class="mt-4 pt-3 border-top border-light border-opacity-10 d-grid gap-2">
-                            <a href="{{ app.file.url }}" class="btn btn-download py-2 d-flex align-items-center justify-content-center gap-2" download>
+                            <!-- Handles both standard file fields and cloud-stored string URLs safely -->
+                            <a href="{% if app.file.url %}{{ app.file.url }}{% else %}{{ app.file }}{% endif %}" class="btn btn-download py-2 d-flex align-items-center justify-content-center gap-2" download target="_blank">
                                 <i class="bi bi-download"></i> Download
                             </a>
                             <a href="{% url 'delete_app' app.id %}" class="btn btn-delete py-1 btn-sm d-flex align-items-center justify-content-center gap-1" onclick="return confirm('Are you sure you want to delete this app?');">
@@ -237,7 +230,6 @@
         </div>
     </div>
 
-    <!-- JavaScript for Live Instant Search Filtering -->
     <script>
         const searchInput = document.getElementById('appSearch');
         const appItems = document.querySelectorAll('.app-item');
