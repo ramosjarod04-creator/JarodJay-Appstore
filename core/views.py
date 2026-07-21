@@ -1,6 +1,7 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Application
 from .forms import ApplicationForm
 
@@ -8,9 +9,9 @@ def app_list(val_request):
     apps = Application.objects.all().order_by('-uploaded_at')
     return render(val_request, 'core/index.html', {'apps': apps})
 
+@csrf_exempt
 def upload_app(val_request):
     if val_request.method == 'POST':
-        # Check if the request is coming via JSON payload from our frontend fetch call
         if val_request.content_type == 'application/json':
             try:
                 data = json.loads(val_request.body)
@@ -24,7 +25,6 @@ def upload_app(val_request):
             except Exception as e:
                 return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
         
-        # Fallback standard form handling
         form = ApplicationForm(val_request.POST)
         if form.is_valid():
             app = form.save(commit=False)
