@@ -12,30 +12,32 @@ def app_list(val_request):
 @csrf_exempt
 def upload_app(val_request):
     if val_request.method == 'POST':
-        if val_request.content_type == 'application/json':
-            try:
+        # Strictly process JSON data payloads coming from the client-side Cloudinary widget script
+        try:
+            if val_request.content_type == 'application/json':
                 data = json.loads(val_request.body)
-                Application.objects.create(
-                    name=data.get('name'),
-                    version=data.get('version'),
-                    description=data.get('description'),
-                    file=data.get('file_url')
-                )
-                return JsonResponse({'status': 'success'})
-            except Exception as e:
-                return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-        
-        form = ApplicationForm(val_request.POST)
-        if form.is_valid():
-            app = form.save(commit=False)
-            file_url = val_request.POST.get('file_url')
-            if file_url:
-                app.file = file_url
-            app.save()
-            return redirect('app_list')
-    else:
-        form = ApplicationForm()
-    return render(val_request, 'core/upload.html', {'form': form})
+            else:
+                data = val_request.POST
+
+            name = data.get('name')
+            version = data.get('version')
+            description = data.get('description')
+            file_url = data.get('file_url')
+
+            if not name or not file_url:
+                return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+
+            Application.objects.create(
+                name=name,
+                version=version,
+                description=description,
+                file=file_url
+            )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return render(val_request, 'core/upload.html')
 
 def delete_app(val_request, pk):
     app = get_object_or_404(Application, pk=pk)
