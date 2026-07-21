@@ -51,44 +51,25 @@
             -webkit-text-fill-color: transparent;
         }
 
-        form p {
-            margin-bottom: 1.25rem;
-        }
-
-        form label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        form input[type="text"], 
-        form textarea {
+        .form-control {
             background: rgba(255, 255, 255, 0.06) !important;
             border: 1px solid var(--card-border) !important;
             color: #ffffff !important;
             border-radius: 10px !important;
             padding: 12px 15px !important;
-            width: 100%;
-            transition: all 0.3s ease;
         }
 
-        /* Completely hide the default Django file input field container since we use Cloudinary widget */
-        form p:has(input[type="file"]), form input[type="file"] {
-            display: none !important;
-        }
-
-        form input::placeholder, 
-        form textarea::placeholder {
-            color: #cbd5e1;
-            opacity: 0.7;
-        }
-
-        form input:focus, form textarea:focus {
+        .form-control:focus {
             border-color: #818cf8 !important;
             box-shadow: 0 0 15px var(--accent-glow) !important;
             outline: none;
+        }
+
+        label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
         }
 
         .btn-custom-primary {
@@ -112,7 +93,6 @@
         .btn-custom-primary:disabled {
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.4);
-            box-shadow: none;
             cursor: not-allowed;
         }
 
@@ -136,25 +116,38 @@
                 <p class="text-muted small m-0">Publish a new build package to your store</p>
             </div>
 
-            <!-- Removed multipart/form-data so it sends a lightweight text payload, completely avoiding Vercel 413 limits -->
-            <form method="post" id="appUploadForm">
+            <!-- Manual form control inputs to prevent any heavy form-data serialization payloads -->
+            <form id="appUploadForm">
                 {% csrf_token %}
-                {{ form.as_p }}
+                
+                <div class="mb-3">
+                    <label>Application Name</label>
+                    <input type="text" id="appName" class="form-control" placeholder="e.g. CyberApp" required>
+                </div>
 
-                <!-- Hidden field to capture the secure Cloudinary URL directly from client-side upload -->
-                <input type="hidden" name="file_url" id="id_file_url">
+                <div class="mb-3">
+                    <label>Version</label>
+                    <input type="text" id="appVersion" class="form-control" placeholder="e.g. v1.0.0" required>
+                </div>
 
-                <!-- Direct Cloudinary Upload Widget Trigger -->
+                <div class="mb-3">
+                    <label>Description</label>
+                    <textarea id="appDescription" class="form-control" rows="3" placeholder="Brief details about the release..." required></textarea>
+                </div>
+
+                <!-- Hidden field for Cloudinary URL -->
+                <input type="hidden" id="id_file_url">
+
                 <div class="mb-3">
                     <label class="form-label">Application File / Package</label>
                     <button type="button" id="upload_widget" class="btn btn-outline-light w-100 py-2 text-start d-flex align-items-center justify-content-between">
                         <span id="upload_btn_text"><i class="bi bi-folder2-open me-2"></i>Choose file via Cloudinary...</span>
                         <span class="badge bg-secondary">Cloud Uploader</span>
                     </button>
-                    <div id="upload_status" class="form-text text-warning mt-2 small">⚠️ Please upload your app package file first before publishing.</div>
+                    <div id="upload_status" class="form-text text-warning mt-2 small">⚠️ Please select and upload your package file first.</div>
                 </div>
 
-                <button type="submit" id="submitBtn" class="btn btn-custom-primary w-100 mt-2" disabled>
+                <button type="button" id="submitBtn" class="btn btn-custom-primary w-100 mt-2" disabled>
                     <i class="bi bi-cloud-arrow-up me-2"></i>Publish Application
                 </button>
             </form>
@@ -167,23 +160,22 @@
         </div>
     </div>
 
-    <!-- Client-side Cloudinary Upload Widget Integration -->
     <script>
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      let uploadedFileUrl = "";
+
       const myWidget = cloudinary.createUploadWidget({
         cloudName: 'daubtyuya',
         uploadPreset: 'appstore_unsigned',
-        maxFileSize: 500000000, // 500MB max file size support
+        maxFileSize: 500000000, 
         resource_type: 'auto'
       }, (error, result) => {
         if (!error && result && result.event === "success") {
-          console.log('Upload complete: ', result.info.secure_url);
-          // Inject secure link into hidden form input
-          document.getElementById('id_file_url').value = result.info.secure_url;
+          uploadedFileUrl = result.info.secure_url;
           
-          // Update status text and enable submit button
           document.getElementById('upload_btn_text').innerHTML = `<i class="bi bi-check-circle-fill text-success me-2"></i> Ready: ${result.info.original_filename}`;
           document.getElementById('upload_status').className = "form-text text-success mt-2 small";
-          document.getElementById('upload_status').innerText = "✓ File uploaded successfully to Cloudinary cloud storage!";
+          document.getElementById('upload_status').innerText = "✓ File uploaded successfully to Cloudinary!";
           document.getElementById('submitBtn').removeAttribute('disabled');
         }
       });
@@ -192,6 +184,52 @@
           e.preventDefault();
           myWidget.open();
       }, false);
+
+      // Handle submission via lightweight Fetch JSON request to avoid Vercel 413 payload limitations completely
+      document.getElementById("submitBtn").addEventListener("click", async function(e) {
+          e.preventDefault();
+
+          const name = document.getElementById('appName').value;
+          const version = document.getElementById('appVersion').value;
+          const description = document.getElementById('appDescription').value;
+
+          if (!name || !version || !uploadedFileUrl) {
+              alert("Please fill out all fields and ensure the file is uploaded.");
+              return;
+          }
+
+          this.setAttribute('disabled', 'true');
+          this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
+
+          try {
+              const response = await fetch("{% url 'upload_app' %}", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      "X-CSRFToken": csrfToken
+                  },
+                  body: JSON.stringify({
+                      name: name,
+                      version: version,
+                      description: description,
+                      file_url: uploadedFileUrl
+                  })
+              });
+
+              if (response.ok) {
+                  window.location.href = "{% url 'app_list' %}";
+              } else {
+                  alert("Failed to save application record.");
+                  this.removeAttribute('disabled');
+                  this.innerHTML = '<i class="bi bi-cloud-arrow-up me-2"></i>Publish Application';
+              }
+          } catch (err) {
+              console.error(err);
+              alert("An error occurred during submission.");
+              this.removeAttribute('disabled');
+              this.innerHTML = '<i class="bi bi-cloud-arrow-up me-2"></i>Publish Application';
+          }
+      });
     </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from .models import Application
 from .forms import ApplicationForm
 
@@ -8,23 +10,33 @@ def app_list(val_request):
 
 def upload_app(val_request):
     if val_request.method == 'POST':
-        # Remove val_request.FILES since files now upload directly client-side to Cloudinary via widget
+        # Check if the request is coming via JSON payload from our frontend fetch call
+        if val_request.content_type == 'application/json':
+            try:
+                data = json.loads(val_request.body)
+                Application.objects.create(
+                    name=data.get('name'),
+                    version=data.get('version'),
+                    description=data.get('description'),
+                    file=data.get('file_url')
+                )
+                return JsonResponse({'status': 'success'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        
+        # Fallback standard form handling
         form = ApplicationForm(val_request.POST)
         if form.is_valid():
             app = form.save(commit=False)
-            
-            # Capture the direct Cloudinary URL from the hidden frontend input field
             file_url = val_request.POST.get('file_url')
             if file_url:
                 app.file = file_url
-                
             app.save()
             return redirect('app_list')
     else:
         form = ApplicationForm()
     return render(val_request, 'core/upload.html', {'form': form})
 
-# Delete view
 def delete_app(val_request, pk):
     app = get_object_or_404(Application, pk=pk)
     if app.file:
