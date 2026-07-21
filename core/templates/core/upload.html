@@ -116,10 +116,8 @@
                 <p class="text-muted small m-0">Publish a new build package to your store</p>
             </div>
 
-            <!-- Manual form control inputs to prevent any heavy form-data serialization payloads -->
-            <form id="appUploadForm">
-                {% csrf_token %}
-                
+            <!-- Plain HTML form layout avoiding standard Django form tag action triggers -->
+            <div id="appUploadForm">
                 <div class="mb-3">
                     <label>Application Name</label>
                     <input type="text" id="appName" class="form-control" placeholder="e.g. CyberApp" required>
@@ -135,9 +133,6 @@
                     <textarea id="appDescription" class="form-control" rows="3" placeholder="Brief details about the release..." required></textarea>
                 </div>
 
-                <!-- Hidden field for Cloudinary URL -->
-                <input type="hidden" id="id_file_url">
-
                 <div class="mb-3">
                     <label class="form-label">Application File / Package</label>
                     <button type="button" id="upload_widget" class="btn btn-outline-light w-100 py-2 text-start d-flex align-items-center justify-content-between">
@@ -150,7 +145,7 @@
                 <button type="button" id="submitBtn" class="btn btn-custom-primary w-100 mt-2" disabled>
                     <i class="bi bi-cloud-arrow-up me-2"></i>Publish Application
                 </button>
-            </form>
+            </div>
 
             <div class="text-center mt-4">
                 <a href="{% url 'app_list' %}" class="back-link small">
@@ -161,7 +156,6 @@
     </div>
 
     <script>
-      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       let uploadedFileUrl = "";
 
       const myWidget = cloudinary.createUploadWidget({
@@ -185,7 +179,7 @@
           myWidget.open();
       }, false);
 
-      // Handle submission via lightweight Fetch JSON request to avoid Vercel 413 payload limitations completely
+      // Handle submission via a lightweight API endpoint call
       document.getElementById("submitBtn").addEventListener("click", async function(e) {
           e.preventDefault();
 
@@ -206,7 +200,6 @@
                   method: "POST",
                   headers: {
                       "Content-Type": "application/json",
-                      "X-CSRFToken": csrfToken
                   },
                   body: JSON.stringify({
                       name: name,
