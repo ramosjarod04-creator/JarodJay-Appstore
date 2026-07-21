@@ -163,7 +163,8 @@
       const myWidget = cloudinary.createUploadWidget({
         cloudName: 'daubtyuya',
         uploadPreset: 'appstore_unsigned',
-        maxFileSize: 500000000, 
+        maxFileSize: 20000000000, 
+        maxRawFileSize: 20000000000,
         resource_type: 'auto'
       }, (error, result) => {
         if (!error && result && result.event === "success") {
